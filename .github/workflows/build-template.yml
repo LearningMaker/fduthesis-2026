@@ -36,6 +36,11 @@ jobs:
           test -f build/unpacked/fdulogo.sty
           test -f build/unpacked/fdudoc.cls
 
+      - name: Install zip
+        run: |
+          apt-get update
+          apt-get install -y zip
+
       - name: Package template files
         run: |
           mkdir -p artifact
