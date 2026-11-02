@@ -1,0 +1,55 @@
+
+name: Build FDU Thesis Template
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/xu-cheng/texlive-full:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show TeX versions
+        run: |
+          xetex --version
+          l3build version
+
+      - name: Build template
+        run: |
+          l3build unpack
+
+      - name: Check generated files
+        run: |
+          ls -lh build/unpacked/
+          test -f build/unpacked/fduthesis-2026.cls
+          test -f build/unpacked/fduthesis-2026-en.cls
+          test -f build/unpacked/fduthesis-2026.def
+          test -f build/unpacked/fdulogo.sty
+          test -f build/unpacked/fdudoc.cls
+
+      - name: Package template files
+        run: |
+          mkdir -p artifact
+          cp build/unpacked/fduthesis-2026.cls artifact/
+          cp build/unpacked/fduthesis-2026-en.cls artifact/
+          cp build/unpacked/fduthesis-2026.def artifact/
+          cp build/unpacked/fdulogo.sty artifact/
+          cp build/unpacked/fdudoc.cls artifact/
+          cd artifact
+          zip -r ../fduthesis-2026-template.zip .
+
+      - name: Upload template artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fduthesis-2026-template
+          path: fduthesis-2026-template.zip
+          if-no-files-found: error
