@@ -36,21 +36,32 @@ jobs:
           test -f build/unpacked/fdulogo.sty
           test -f build/unpacked/fdudoc.cls
 
-      - name: Install zip
+            - name: Package template files
         run: |
-          apt-get update
-          apt-get install -y zip
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
 
-      - name: Package template files
-        run: |
-          mkdir -p artifact
-          cp build/unpacked/fduthesis-2026.cls artifact/
-          cp build/unpacked/fduthesis-2026-en.cls artifact/
-          cp build/unpacked/fduthesis-2026.def artifact/
-          cp build/unpacked/fdulogo.sty artifact/
-          cp build/unpacked/fdudoc.cls artifact/
-          cd artifact
-          zip -r ../fduthesis-2026-template.zip .
+          files = [
+              "fduthesis-2026.cls",
+              "fduthesis-2026-en.cls",
+              "fduthesis-2026.def",
+              "fdulogo.sty",
+              "fdudoc.cls",
+          ]
+
+          source = Path("build/unpacked")
+          output = Path("fduthesis-2026-template.zip")
+
+          with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as z:
+              for filename in files:
+                  path = source / filename
+                  assert path.exists(), f"Missing file: {path}"
+                  z.write(path, arcname=filename)
+
+          print(f"Created {output}")
+          print(f"Size: {output.stat().st_size} bytes")
+          PY
 
       - name: Upload template artifact
         uses: actions/upload-artifact@v4
