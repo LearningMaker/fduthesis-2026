@@ -36,7 +36,7 @@ jobs:
           test -f build/unpacked/fdulogo.sty
           test -f build/unpacked/fdudoc.cls
 
-            - name: Package template files
+      - name: Package template files
         run: |
           python3 - <<'PY'
           import zipfile
